@@ -1,0 +1,5 @@
+# Ignore IDE/editor config files
+.vscode/
+
+# Ignore LLM agent configuration files
+.claude/
