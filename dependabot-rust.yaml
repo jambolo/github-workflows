@@ -1,0 +1,21 @@
+# Dependabot configuration (Rust)
+#
+# Purpose:
+# - Check Cargo and rust-toolchain updates weekly
+# - Ignore patch-level updates to reduce noise
+version: 2
+updates:
+  - package-ecosystem: "cargo"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+  - package-ecosystem: "rust-toolchain"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]

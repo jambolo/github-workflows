@@ -1,0 +1,33 @@
+# Sync master to develop
+#
+# Purpose:
+# - Keep develop updated by merging master on every master push
+name: Sync master to develop
+
+# Trigger on pushes to master.
+on:
+  push:
+    branches:
+      - master
+
+# Job: sync
+# - Checkout with full history
+# - Merge master into develop and push
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Merge master into develop
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin develop
+          git checkout develop
+          git merge origin/master --no-ff -m "Merge master into develop after release"
+          git push origin develop

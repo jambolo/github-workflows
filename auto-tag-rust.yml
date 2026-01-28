@@ -1,0 +1,57 @@
+# Auto Tag (Rust)
+#
+# Purpose:
+# - On pushes to master that modify Cargo.toml, read the package version
+# - If a corresponding tag doesn't exist, create and push v<version>
+name: Auto Tag (Rust)
+
+# Trigger only when Cargo.toml changes on master.
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'Cargo.toml'
+
+# Job: tag
+# - Checkout with full history (needed to see tags)
+# - Install cargo-get to read Cargo.toml version
+# - Create and push tag if it doesn't already exist
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Install cargo-get
+        run: cargo install cargo-get
+
+      - name: Extract version from Cargo.toml
+        id: get_version
+        run: |
+          VERSION=$(cargo get package.version)
+          echo "version=v$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: v$VERSION"
+
+      - name: Check if tag exists
+        id: check_tag
+        run: |
+          if git rev-parse "refs/tags/${{ steps.get_version.outputs.version }}" >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create and push tag
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag ${{ steps.get_version.outputs.version }}
+          git push origin ${{ steps.get_version.outputs.version }}
