@@ -43,6 +43,18 @@ jobs:
         cache-bin: true    # ensure ~/.cargo/bin (tarpaulin etc.) is cached
         rustflags: ""      # avoid forcing RUSTFLAGS="-D warnings"
 
+    - name: Detect library crate (cargo metadata)
+      id: crate_kind
+      run: |
+        python3 - <<'PY'
+        import json, os, subprocess
+        data = json.loads(subprocess.check_output(["cargo", "metadata", "--no-deps", "--format-version=1"]))
+        has_lib = any("lib" in (t.get("kind") or []) for p in data.get("packages", []) for t in p.get("targets", []))
+        with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
+          f.write(f"has_lib={'true' if has_lib else 'false'}\n")
+        print("has_lib =", has_lib)
+        PY
+
     - name: Check code formatting
       uses: actions-rust-lang/rustfmt@v1
       continue-on-error: true
@@ -58,12 +70,14 @@ jobs:
       run: cargo test --verbose
 
     - name: Generate code coverage
+      if: steps.crate_kind.outputs.has_lib == 'true'
       run: |
         cargo install cargo-tarpaulin --version ${{ env.TARPAULIN_VERSION }} --locked || cargo tarpaulin --version
         cargo tarpaulin --out Xml
       continue-on-error: true
 
     - name: Upload coverage to Codecov
+      if: steps.crate_kind.outputs.has_lib == 'true'
       uses: codecov/codecov-action@v5
       with:
         files: tarpaulin-report.xml
