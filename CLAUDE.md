@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Purpose
 
-This is a collection of GitHub Actions workflows. The workflows manage CI/CD, versioning, tagging, and dependency updates.
+This is a collection of GitHub Actions workflows. The workflows manage CI/CD, versioning, tagging, dependency updates, and documentation deployment.
 
 ## Workflow Architecture
 
@@ -15,6 +15,11 @@ The workflows implement a branching strategy with three main flows:
 - **validation-rust.yml**: Main CI pipeline for develop branch pushes and master PRs
   - Runs: formatting checks, Clippy linting, builds, tests, and coverage
   - Format/lint/coverage are non-blocking to allow PRs to merge while fixing style issues
+  - Uploads coverage to Codecov
+
+- **validate-cpp.yml**: C++ CI pipeline for develop and master branches (pushes and PRs)
+  - Runs: clang-tidy linting (PRs only), CMake configuration, builds, tests, and coverage
+  - Generates coverage with lcov
   - Uploads coverage to Codecov
 
 ### Versioning and Release
@@ -36,6 +41,14 @@ The workflows implement a branching strategy with three main flows:
   - Uses no-ff merges to preserve commit history
 
 - **release-rust.yml**: Also merges master into develop after a new release tag
+
+### Documentation
+
+- **deploy-doxygen-docs.yml**: Builds and deploys Doxygen documentation
+  - Triggers on master pushes or manual workflow dispatch
+  - Configures CMake with documentation build enabled
+  - Builds doxygen target with Graphviz support
+  - Deploys HTML output to GitHub Pages
 
 ### Dependency Management
 

@@ -25,3 +25,11 @@ Automatically merges master into develop on every push to master to keep develop
 ## dependabot-rust.yaml
 
 Configures Dependabot to check Cargo and rust-toolchain updates weekly while ignoring semver patch updates.
+
+## validate-cpp.yml
+
+Runs C++ CI on pushes and PRs for develop and master branches. Installs clang-tidy, lcov, and ninja-build, configures CMake, runs clang-tidy for linting (PRs only), builds, runs tests, generates code coverage with lcov, and publishes coverage to Codecov.
+
+## deploy-doxygen-docs.yml
+
+Builds and deploys Doxygen documentation to GitHub Pages on every push to master (or via workflow dispatch). Installs Doxygen and graphviz, configures CMake with documentation build enabled, builds the doxygen target, and uploads the HTML output to GitHub Pages.
